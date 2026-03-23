@@ -1,0 +1,158 @@
+{% extends "tasks/base.html" %}
+{% block nav_notes %}active{% endblock %}
+
+{% block topbar_actions %}
+<a href="{% url 'note_create' %}" class="btn btn-primary btn-sm">
+    <i class="fa-solid fa-plus"></i> New Note
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+
+    <!-- Filter Bar -->
+    <form method="GET" class="filter-bar">
+        <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" name="q" class="form-control"
+                   placeholder="Search note content or task name…" value="{{ query }}">
+        </div>
+
+        <div class="filter-group">
+            <label>Task</label>
+            <select name="task" class="filter-select" onchange="this.form.submit()">
+                <option value="">All Tasks</option>
+                {% for t in tasks %}
+                <option value="{{ t.pk }}" {% if task_filter == t.pk|stringformat:"s" %}selected{% endif %}>
+                    {{ t.title|truncatechars:40 }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-secondary btn-sm">
+            <i class="fa-solid fa-magnifying-glass"></i> Search
+        </button>
+
+        {% if query or task_filter %}
+        <a href="{% url 'note_list' %}" class="btn btn-secondary btn-sm">
+            <i class="fa-solid fa-xmark"></i> Clear
+        </a>
+        {% endif %}
+    </form>
+
+    <!-- Sort bar -->
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; font-size:13px; color:var(--text-muted);">
+        <span>{{ page_obj.paginator.count }} note{% if page_obj.paginator.count != 1 %}s{% endif %}</span>
+        {% with base="?q="|add:query|add:"&task="|add:task_filter %}
+        <div style="display:flex; align-items:center; gap:6px;">
+            <span>Sort:</span>
+            <a href="{{ base }}&sort=-created_at"  class="btn btn-secondary btn-sm {% if sort_by == '-created_at' %}active{% endif %}">Newest</a>
+            <a href="{{ base }}&sort=created_at"   class="btn btn-secondary btn-sm {% if sort_by == 'created_at' %}active{% endif %}">Oldest</a>
+            <a href="{{ base }}&sort=task__title"  class="btn btn-secondary btn-sm {% if sort_by == 'task__title' %}active{% endif %}">Task A→Z</a>
+            <a href="{{ base }}&sort=-task__title" class="btn btn-secondary btn-sm {% if sort_by == '-task__title' %}active{% endif %}">Task Z→A</a>
+        </div>
+        {% endwith %}
+    </div>
+
+    {% if page_obj.object_list %}
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Content</th>
+                    <th>Task</th>
+                    <th>Created</th>
+                    <th style="text-align:right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for note in page_obj %}
+                <tr>
+                    <td style="max-width:360px;">
+                        <span class="task-title-cell"
+                              style="display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:340px;">
+                            {{ note.content|truncatechars:80 }}
+                        </span>
+                    </td>
+                    <td>
+                        <a href="{% url 'task_detail' note.task.pk %}"
+                           style="color:var(--accent-light); text-decoration:none; font-size:13px;">
+                            <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:10px; margin-right:4px;"></i>
+                            {{ note.task.title|truncatechars:40 }}
+                        </a>
+                    </td>
+                    <td style="color:var(--text-muted); font-size:13px;">
+                        {{ note.created_at|date:"M d, Y · H:i" }}
+                    </td>
+                    <td>
+                        <div style="display:flex; gap:5px; justify-content:flex-end;">
+                            <!-- View parent task -->
+                            <a href="{% url 'task_detail' note.task.pk %}"
+                               class="btn btn-secondary btn-icon btn-sm" title="View Task">
+                                <i class="fa-solid fa-eye"></i>
+                            </a>
+                            <!-- Edit note -->
+                            <a href="{% url 'note_edit' note.pk %}"
+                               class="btn btn-secondary btn-icon btn-sm" title="Edit">
+                                <i class="fa-solid fa-pen"></i>
+                            </a>
+                            <!-- Delete note -->
+                            <form method="POST" action="{% url 'note_delete' note.pk %}" style="margin:0;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger btn-icon btn-sm"
+                                        title="Delete" onclick="return confirm('Delete this note?')">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <div class="pagination" style="padding:16px 0;">
+        {% with base="?q="|add:query|add:"&task="|add:task_filter|add:"&sort="|add:sort_by %}
+        {% if page_obj.has_previous %}
+            <a href="{{ base }}&page={{ page_obj.previous_page_number }}" class="page-btn"><i class="fa-solid fa-chevron-left"></i></a>
+        {% else %}
+            <span class="page-btn disabled"><i class="fa-solid fa-chevron-left"></i></span>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+                <span class="page-btn active">{{ num }}</span>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <a href="{{ base }}&page={{ num }}" class="page-btn">{{ num }}</a>
+            {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+            <a href="{{ base }}&page={{ page_obj.next_page_number }}" class="page-btn"><i class="fa-solid fa-chevron-right"></i></a>
+        {% else %}
+            <span class="page-btn disabled"><i class="fa-solid fa-chevron-right"></i></span>
+        {% endif %}
+        {% endwith %}
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="empty-state">
+        <i class="fa-regular fa-note-sticky"></i>
+        <p>
+            No notes found.
+            {% if query or task_filter %}
+                <a href="{% url 'note_list' %}" style="color:var(--accent-light);">Clear filters</a>
+            {% else %}
+                <a href="{% url 'note_create' %}" style="color:var(--accent-light);">Create your first note</a>
+            {% endif %}
+        </p>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

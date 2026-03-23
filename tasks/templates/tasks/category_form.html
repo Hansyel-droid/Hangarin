@@ -1,0 +1,36 @@
+{% extends "tasks/base.html" %}
+{% block nav_categories %}active{% endblock %}
+
+{% block topbar_actions %}
+<a href="{% url 'category_list' %}" class="btn btn-ghost btn-sm">
+    <i class="fa-solid fa-arrow-left"></i> Back
+</a>
+{% endblock %}
+
+{% block content %}
+<div style="max-width:480px;">
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title">
+                <i class="fa-solid fa-tag" style="color:var(--accent); margin-right:6px;"></i>
+                {{ action }} Category
+            </span>
+        </div>
+        <div class="card-body">
+            <form method="POST">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label class="form-label">Name <span style="color:var(--red);">*</span></label>
+                    <input type="text" name="name" class="form-control" placeholder="e.g. Work, Personal, School…" value="{% if category %}{{ category.name }}{% endif %}" required>
+                </div>
+                <div style="display:flex; gap:10px;">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa-solid fa-save"></i> {{ action }}
+                    </button>
+                    <a href="{% url 'category_list' %}" class="btn btn-ghost">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

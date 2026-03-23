@@ -1,0 +1,127 @@
+{% extends "tasks/base.html" %}
+{% block nav_dashboard %}active{% endblock %}
+
+{% block topbar_actions %}
+<a href="{% url 'task_create' %}" class="btn btn-primary btn-sm">
+    <i class="fa-solid fa-plus"></i> New Task
+</a>
+{% endblock %}
+
+{% block content %}
+
+<div class="stats-row">
+    <div class="stat">
+        <div class="stat-top">
+            <div>
+                <div class="stat-num">{{ total_tasks }}</div>
+                <div class="stat-lbl">Total Tasks</div>
+            </div>
+            <div class="stat-icon si-green"><i class="fa-solid fa-list-check"></i></div>
+        </div>
+    </div>
+    <div class="stat">
+        <div class="stat-top">
+            <div>
+                <div class="stat-num">{{ completed_tasks }}</div>
+                <div class="stat-lbl">Completed</div>
+            </div>
+            <div class="stat-icon si-green"><i class="fa-solid fa-circle-check"></i></div>
+        </div>
+    </div>
+    <div class="stat">
+        <div class="stat-top">
+            <div>
+                <div class="stat-num">{{ pending_tasks }}</div>
+                <div class="stat-lbl">Pending</div>
+            </div>
+            <div class="stat-icon si-yellow"><i class="fa-regular fa-clock"></i></div>
+        </div>
+    </div>
+    <div class="stat">
+        <div class="stat-top">
+            <div>
+                <div class="stat-num">{{ in_progress_tasks }}</div>
+                <div class="stat-lbl">In Progress</div>
+            </div>
+            <div class="stat-icon si-blue"><i class="fa-solid fa-spinner"></i></div>
+        </div>
+    </div>
+    <div class="stat">
+        <div class="stat-top">
+            <div>
+                <div class="stat-num">{{ tasks_this_year }}</div>
+                <div class="stat-lbl">This Year</div>
+            </div>
+            <div class="stat-icon si-orange"><i class="fa-solid fa-calendar-days"></i></div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <span class="card-title">Recent Tasks</span>
+        <a href="{% url 'task_list' %}" class="btn btn-ghost btn-sm">
+            View all <i class="fa-solid fa-arrow-right"></i>
+        </a>
+    </div>
+
+    {% if recent_tasks %}
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Status</th>
+                    <th>Priority</th>
+                    <th>Category</th>
+                    <th>Deadline</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for task in recent_tasks %}
+                <tr>
+                    <td class="td-strong">{{ task.title }}</td>
+                    <td>
+                        {% if task.status == 'Completed' %}
+                            <span class="badge b-completed"><i class="fa-solid fa-circle-check"></i> Completed</span>
+                        {% elif task.status == 'In Progress' %}
+                            <span class="badge b-progress"><i class="fa-solid fa-spinner"></i> In Progress</span>
+                        {% else %}
+                            <span class="badge b-pending"><i class="fa-regular fa-clock"></i> Pending</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if task.priority %}
+                            <span class="badge b-{{ task.priority.name|lower }}">{{ task.priority.name }}</span>
+                        {% else %}<span class="td-muted">—</span>{% endif %}
+                    </td>
+                    <td>
+                        {% if task.category %}
+                            <span class="badge b-cat"><i class="fa-solid fa-tag"></i> {{ task.category.name }}</span>
+                        {% else %}<span class="td-muted">—</span>{% endif %}
+                    </td>
+                    <td class="td-muted">
+                        {% if task.deadline %}{{ task.deadline|date:"M d, Y" }}{% else %}—{% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'task_detail' task.pk %}" class="btn btn-ghost btn-sm btn-icon">
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div style="padding:20px;" class="card-body">
+        <div style="text-align:center; padding:32px 0; color:var(--text-3);">
+            <i class="fa-solid fa-inbox" style="font-size:28px; margin-bottom:10px; display:block; opacity:.5;"></i>
+            <p style="font-size:13.5px;">No tasks yet. <a href="{% url 'task_create' %}" style="color:var(--accent); font-weight:600;">Create your first task</a></p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

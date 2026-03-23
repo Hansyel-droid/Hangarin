@@ -1,0 +1,47 @@
+{% extends "tasks/base.html" %}
+{% block nav_notes %}active{% endblock %}
+
+{% block topbar_actions %}
+<a href="{% url 'note_list' %}" class="btn btn-secondary btn-sm">
+    <i class="fa-solid fa-arrow-left"></i> Back to Notes
+</a>
+{% endblock %}
+
+{% block content %}
+<div style="max-width:560px;">
+    <div class="card">
+        <div class="card-title" style="padding:0 0 4px;">
+            <i class="fa-regular fa-note-sticky" style="color:var(--accent);"></i>
+            {{ action }} Note
+        </div>
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label class="form-label">Task <span style="color:var(--red);">*</span></label>
+                {{ form.task }}
+                {% if form.task.errors %}
+                    <div style="color:var(--red); font-size:12px; margin-top:4px;">{{ form.task.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Content <span style="color:var(--red);">*</span></label>
+                {{ form.content }}
+                {% if form.content.errors %}
+                    <div style="color:var(--red); font-size:12px; margin-top:4px;">{{ form.content.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div style="display:flex; gap:10px; padding-top:6px;">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fa-solid {% if action == 'Create' %}fa-plus{% else %}fa-save{% endif %}"></i>
+                    {{ action }} Note
+                </button>
+                <a href="{% url 'note_list' %}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

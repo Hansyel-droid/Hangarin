@@ -1,0 +1,174 @@
+{% extends "tasks/base.html" %}
+{% block nav_tasks %}active{% endblock %}
+
+{% block topbar_actions %}
+<a href="{% url 'task_create' %}" class="btn btn-primary btn-sm">
+    <i class="fa-solid fa-plus"></i> New Task
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <span class="card-title">All Tasks</span>
+        <span class="td-muted" style="font-size:13px;">{{ page_obj.paginator.count }} task{% if page_obj.paginator.count != 1 %}s{% endif %}</span>
+    </div>
+
+    <div class="card-body">
+        <!-- Filter Bar -->
+        <form method="GET" class="filter-bar">
+            <div class="search-wrap">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" name="q" class="form-control" placeholder="Search tasks…" value="{{ query }}">
+            </div>
+
+            <select name="status" class="inline-select" onchange="this.form.submit()">
+                <option value="">All Status</option>
+                <option value="Pending" {% if status_filter == 'Pending' %}selected{% endif %}>Pending</option>
+                <option value="In Progress" {% if status_filter == 'In Progress' %}selected{% endif %}>In Progress</option>
+                <option value="Completed" {% if status_filter == 'Completed' %}selected{% endif %}>Completed</option>
+            </select>
+
+            <select name="category" class="inline-select" onchange="this.form.submit()">
+                <option value="">All Categories</option>
+                {% for cat in categories %}
+                <option value="{{ cat.pk }}" {% if category_filter == cat.pk|stringformat:"s" %}selected{% endif %}>{{ cat.name }}</option>
+                {% endfor %}
+            </select>
+
+            <select name="priority" class="inline-select" onchange="this.form.submit()">
+                <option value="">All Priorities</option>
+                {% for p in priorities %}
+                <option value="{{ p.pk }}" {% if priority_filter == p.pk|stringformat:"s" %}selected{% endif %}>{{ p.name }}</option>
+                {% endfor %}
+            </select>
+
+            <button type="submit" class="btn btn-ghost btn-sm"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
+
+            {% if query or status_filter or category_filter or priority_filter %}
+            <a href="{% url 'task_list' %}" class="btn btn-ghost btn-sm"><i class="fa-solid fa-xmark"></i> Clear</a>
+            {% endif %}
+        </form>
+
+        <!-- Sort Chips -->
+        {% with base="?q="|add:query|add:"&status="|add:status_filter|add:"&category="|add:category_filter|add:"&priority="|add:priority_filter %}
+        <div class="sort-bar">
+            <span class="sort-lbl">Sort:</span>
+            <a href="{{ base }}&sort=title"        class="sort-chip {% if sort_by == 'title' %}on{% endif %}">A → Z</a>
+            <a href="{{ base }}&sort=-title"       class="sort-chip {% if sort_by == '-title' %}on{% endif %}">Z → A</a>
+            <a href="{{ base }}&sort=-created_at"  class="sort-chip {% if sort_by == '-created_at' %}on{% endif %}">Newest</a>
+            <a href="{{ base }}&sort=created_at"   class="sort-chip {% if sort_by == 'created_at' %}on{% endif %}">Oldest</a>
+            <a href="{{ base }}&sort=deadline"     class="sort-chip {% if sort_by == 'deadline' %}on{% endif %}">Deadline ↑</a>
+            <a href="{{ base }}&sort=-deadline"    class="sort-chip {% if sort_by == '-deadline' %}on{% endif %}">Deadline ↓</a>
+            <a href="{{ base }}&sort=status"       class="sort-chip {% if sort_by == 'status' %}on{% endif %}">Status</a>
+        </div>
+        {% endwith %}
+    </div>
+
+    {% if page_obj.object_list %}
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Status</th>
+                    <th>Priority</th>
+                    <th>Category</th>
+                    <th>Deadline</th>
+                    <th>Created</th>
+                    <th style="text-align:right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for task in page_obj %}
+                <tr>
+                    <td>
+                        <a href="{% url 'task_detail' task.pk %}" class="td-link">{{ task.title }}</a>
+                    </td>
+                    <td>
+                        {% if task.status == 'Completed' %}
+                            <span class="badge b-completed"><i class="fa-solid fa-circle-check"></i> Completed</span>
+                        {% elif task.status == 'In Progress' %}
+                            <span class="badge b-progress"><i class="fa-solid fa-spinner"></i> In Progress</span>
+                        {% else %}
+                            <span class="badge b-pending"><i class="fa-regular fa-clock"></i> Pending</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if task.priority %}
+                            <span class="badge b-{{ task.priority.name|lower }}">{{ task.priority.name }}</span>
+                        {% else %}<span class="td-muted">—</span>{% endif %}
+                    </td>
+                    <td>
+                        {% if task.category %}
+                            <span class="badge b-cat"><i class="fa-solid fa-tag"></i> {{ task.category.name }}</span>
+                        {% else %}<span class="td-muted">—</span>{% endif %}
+                    </td>
+                    <td class="td-muted">{% if task.deadline %}{{ task.deadline|date:"M d, Y" }}{% else %}—{% endif %}</td>
+                    <td class="td-muted">{{ task.created_at|date:"M d, Y" }}</td>
+                    <td>
+                        <div style="display:flex; gap:5px; justify-content:flex-end;">
+                            <a href="{% url 'task_detail' task.pk %}" class="btn btn-ghost btn-sm btn-icon" title="View">
+                                <i class="fa-regular fa-eye"></i>
+                            </a>
+                            <a href="{% url 'task_edit' task.pk %}" class="btn btn-ghost btn-sm btn-icon" title="Edit">
+                                <i class="fa-solid fa-pen"></i>
+                            </a>
+                            <a href="{% url 'task_delete' task.pk %}" class="btn btn-danger btn-sm btn-icon" title="Delete">
+                                <i class="fa-solid fa-trash"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if page_obj.has_other_pages %}
+    <div class="card-body" style="padding-top:0;">
+        <div class="pager">
+            {% if page_obj.has_previous %}
+                <a href="?{% if query %}q={{ query }}&{% endif %}{% if status_filter %}status={{ status_filter }}&{% endif %}{% if sort_by %}sort={{ sort_by }}&{% endif %}page={{ page_obj.previous_page_number }}">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </a>
+            {% else %}
+                <span class="disabled"><i class="fa-solid fa-chevron-left"></i></span>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <span class="cur">{{ num }}</span>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <a href="?{% if query %}q={{ query }}&{% endif %}{% if status_filter %}status={{ status_filter }}&{% endif %}{% if sort_by %}sort={{ sort_by }}&{% endif %}page={{ num }}">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <a href="?{% if query %}q={{ query }}&{% endif %}{% if status_filter %}status={{ status_filter }}&{% endif %}{% if sort_by %}sort={{ sort_by }}&{% endif %}page={{ page_obj.next_page_number }}">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </a>
+            {% else %}
+                <span class="disabled"><i class="fa-solid fa-chevron-right"></i></span>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="card-body">
+        <div style="text-align:center; padding:40px 0; color:var(--text-3);">
+            <i class="fa-solid fa-inbox" style="font-size:28px; margin-bottom:10px; display:block; opacity:.5;"></i>
+            <p style="font-size:13.5px;">
+                No tasks found.
+                {% if query or status_filter or category_filter %}
+                    <a href="{% url 'task_list' %}" style="color:var(--accent); font-weight:600;">Clear filters</a>
+                {% else %}
+                    <a href="{% url 'task_create' %}" style="color:var(--accent); font-weight:600;">Create your first task</a>
+                {% endif %}
+            </p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
