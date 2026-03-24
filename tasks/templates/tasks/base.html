@@ -271,6 +271,8 @@
             display: flex;
             flex-direction: column;
             min-height: 100vh;
+            min-width: 0;
+            width: calc(100% - var(--sidebar-w));
         }
 
         .topbar {
@@ -331,14 +333,25 @@
         /* ═══════════════════════════════════════
            STAT CARDS
         ═══════════════════════════════════════ */
-        .stats-grid {
+        .stats-grid,
+        .stats-row {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(185px, 1fr));
+            grid-template-columns: repeat(5, 1fr);
             gap: 14px;
             margin-bottom: 26px;
         }
 
-        .stat-card {
+        @media (max-width: 1100px) {
+            .stats-grid, .stats-row { grid-template-columns: repeat(3, 1fr); }
+        }
+
+        @media (max-width: 700px) {
+            .stats-grid, .stats-row { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        /* dashboard.html uses .stat, base uses .stat-card — support both */
+        .stat-card,
+        .stat {
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: var(--radius);
@@ -349,9 +362,11 @@
             box-shadow: var(--shadow);
         }
 
-        .stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+        .stat-card:hover,
+        .stat:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
 
-        .stat-card::after {
+        .stat-card::after,
+        .stat::after {
             content: '';
             position: absolute;
             bottom: 0; left: 0; right: 0;
@@ -359,26 +374,27 @@
             border-radius: 0 0 var(--radius) var(--radius);
         }
 
-        .stat-card.green::after  { background: var(--green); }
-        .stat-card.yellow::after { background: var(--yellow); }
-        .stat-card.blue::after   { background: var(--blue); }
-        .stat-card.orange::after { background: var(--orange); }
-        .stat-card.purple::after { background: #7c6af5; }
+        .stat-card.green::after,
+        .stat.green::after  { background: var(--green); }
+        .stat-card.yellow::after,
+        .stat.yellow::after { background: var(--yellow); }
+        .stat-card.blue::after,
+        .stat.blue::after   { background: var(--blue); }
+        .stat-card.orange::after,
+        .stat.orange::after { background: var(--orange); }
+        .stat-card.purple::after,
+        .stat.purple::after { background: #7c6af5; }
 
-        .stat-icon {
-            width: 38px; height: 38px;
-            border-radius: 9px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 15px;
-            margin-bottom: 14px;
+        /* stat-top: row layout for number + icon side by side */
+        .stat-top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 8px;
         }
 
-        .stat-card.green  .stat-icon { background: var(--green-bg);  color: var(--green); }
-        .stat-card.yellow .stat-icon { background: var(--yellow-bg); color: var(--yellow); }
-        .stat-card.blue   .stat-icon { background: var(--blue-bg);   color: var(--blue); }
-        .stat-card.orange .stat-icon { background: var(--orange-bg); color: var(--orange); }
-        .stat-card.purple .stat-icon { background: rgba(124,106,245,0.09); color: #7c6af5; }
-
+        /* Numbers */
+        .stat-num,
         .stat-value {
             font-family: 'Playfair Display', serif;
             font-size: 30px;
@@ -388,6 +404,8 @@
             margin-bottom: 4px;
         }
 
+        /* Labels */
+        .stat-lbl,
         .stat-label {
             font-size: 11.5px;
             font-weight: 500;
@@ -395,6 +413,29 @@
             text-transform: uppercase;
             letter-spacing: 0.7px;
         }
+
+        /* Icons */
+        .stat-icon {
+            width: 38px; height: 38px;
+            border-radius: 9px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 15px;
+            flex-shrink: 0;
+        }
+
+        /* si-* color variants used in dashboard.html */
+        .si-green  { background: var(--green-bg);  color: var(--green); }
+        .si-yellow { background: var(--yellow-bg); color: var(--yellow); }
+        .si-blue   { background: var(--blue-bg);   color: var(--blue); }
+        .si-orange { background: var(--orange-bg); color: var(--orange); }
+        .si-purple { background: rgba(124,106,245,0.09); color: #7c6af5; }
+
+        /* stat-card color variants */
+        .stat-card.green  .stat-icon { background: var(--green-bg);  color: var(--green); }
+        .stat-card.yellow .stat-icon { background: var(--yellow-bg); color: var(--yellow); }
+        .stat-card.blue   .stat-icon { background: var(--blue-bg);   color: var(--blue); }
+        .stat-card.orange .stat-icon { background: var(--orange-bg); color: var(--orange); }
+        .stat-card.purple .stat-icon { background: rgba(124,106,245,0.09); color: #7c6af5; }
 
         /* ═══════════════════════════════════════
            BUTTONS
@@ -594,6 +635,41 @@
         .badge-critical  { background: rgba(184,64,64,0.14); color: var(--red); border: 1px solid rgba(184,64,64,0.25); font-weight:600; }
         .badge-optional  { background: var(--blue-bg);   color: var(--blue);   border: 1px solid rgba(59,110,165,0.18); }
 
+        /* b-* shorthand variants used in dashboard/task templates */
+        .b-completed { background: var(--green-bg);  color: var(--green);  border: 1px solid rgba(61,139,106,0.18); }
+        .b-progress  { background: var(--blue-bg);   color: var(--blue);   border: 1px solid rgba(59,110,165,0.18); }
+        .b-pending   { background: var(--yellow-bg); color: var(--yellow); border: 1px solid rgba(176,125,46,0.18); }
+        .b-high      { background: var(--red-bg);    color: var(--red);    border: 1px solid rgba(184,64,64,0.18); }
+        .b-critical  { background: rgba(184,64,64,0.14); color: var(--red); border: 1px solid rgba(184,64,64,0.25); font-weight:600; }
+        .b-medium    { background: var(--yellow-bg); color: var(--yellow); border: 1px solid rgba(176,125,46,0.18); }
+        .b-low       { background: var(--green-bg);  color: var(--green);  border: 1px solid rgba(61,139,106,0.18); }
+        .b-optional  { background: var(--blue-bg);   color: var(--blue);   border: 1px solid rgba(59,110,165,0.18); }
+        .b-cat       { background: var(--bg-elevated); color: var(--text-secondary); border: 1px solid var(--border); }
+
+        /* Table cell helpers */
+        .td-strong { font-weight: 600; color: var(--text-primary); }
+        .td-muted  { color: var(--text-muted); font-size: 13px; }
+        .td-link   { color: var(--text-primary); font-weight: 600; text-decoration: none; }
+        .td-link:hover { color: var(--accent); }
+
+        /* Card header (used in dashboard recent tasks card) */
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 0 18px 0;
+            margin-bottom: 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        /* btn-ghost used in dashboard */
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-secondary);
+            border-color: var(--border);
+        }
+        .btn-ghost:hover { background: var(--bg-hover); color: var(--text-primary); border-color: var(--border-light); }
+
         /* ═══════════════════════════════════════
            PAGINATION
         ═══════════════════════════════════════ */
@@ -656,7 +732,8 @@
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
         .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; }
 
-        @media (max-width: 768px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+        @media (max-width: 900px) { .grid-3 { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 640px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
 
         /* ═══════════════════════════════════════
            SUBTASK ROWS
