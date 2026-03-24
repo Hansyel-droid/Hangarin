@@ -138,10 +138,10 @@ def note_delete(request, pk):
     if request.method == 'POST':
         note.delete()
         messages.success(request, 'Note deleted successfully!')
-    # redirect back to referrer if it's the note list, otherwise task detail
-    referer = request.META.get('HTTP_REFERER', '')
-    if 'notes' in referer:
-        return redirect('note_list')
+        next_url = request.POST.get('next', '')
+        if next_url == 'note_list':
+            return redirect('note_list')
+        return redirect('task_detail', pk=task_pk)
     return redirect('task_detail', pk=task_pk)
 
 
@@ -167,9 +167,10 @@ def subtask_delete(request, pk):
     if request.method == 'POST':
         subtask.delete()
         messages.success(request, 'Sub-task deleted successfully!')
-    referer = request.META.get('HTTP_REFERER', '')
-    if 'subtasks' in referer:
-        return redirect('subtask_list')
+        next_url = request.POST.get('next', '')
+        if next_url == 'subtask_list':
+            return redirect('subtask_list')
+        return redirect('task_detail', pk=task_pk)
     return redirect('task_detail', pk=task_pk)
 
 
@@ -178,8 +179,8 @@ def subtask_toggle(request, pk):
     subtask = get_object_or_404(SubTask, pk=pk)
     subtask.status = 'Pending' if subtask.status == 'Completed' else 'Completed'
     subtask.save()
-    referer = request.META.get('HTTP_REFERER', '')
-    if 'subtasks' in referer:
+    next_url = request.GET.get('next', '')
+    if next_url == 'subtask_list':
         return redirect('subtask_list')
     return redirect('task_detail', pk=subtask.parent_task.pk)
 

@@ -100,6 +100,7 @@
                             <!-- Delete note -->
                             <form method="POST" action="{% url 'note_delete' note.pk %}" style="margin:0;">
                                 {% csrf_token %}
+                                <input type="hidden" name="next" value="note_list">
                                 <button type="submit" class="btn btn-danger btn-icon btn-sm"
                                         title="Delete" onclick="return confirm('Delete this note?')">
                                     <i class="fa-solid fa-trash"></i>
