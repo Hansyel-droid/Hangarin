@@ -102,11 +102,10 @@
                     <td>
                         <div style="display:flex; gap:5px; justify-content:flex-end;">
                             <!-- Toggle status -->
-                            <a href="{% url 'subtask_toggle' st.pk %}"
-                               class="btn btn-secondary btn-icon btn-sm"
-                               title="{% if st.status == 'Completed' %}Mark Pending{% else %}Mark Complete{% endif %}">
-                                <i class="fa-solid fa-rotate"></i>
-                            </a>
+                            <a href="{% url 'subtask_toggle' st.pk %}?next=subtask_list"
+                                class="btn btn-secondary btn-icon btn-sm" title="Toggle status">
+                                    <i class="fa-solid fa-rotate"></i>
+                                </a>
                             <!-- View parent task -->
                             <a href="{% url 'task_detail' st.parent_task.pk %}"
                                class="btn btn-secondary btn-icon btn-sm" title="View Parent Task">
@@ -120,6 +119,7 @@
                             <!-- Delete sub-task -->
                             <form method="POST" action="{% url 'subtask_delete' st.pk %}" style="margin:0;">
                                 {% csrf_token %}
+                                <input type="hidden" name="next" value="subtask_list">
                                 <button type="submit" class="btn btn-danger btn-icon btn-sm"
                                         title="Delete" onclick="return confirm('Delete this sub-task?')">
                                     <i class="fa-solid fa-trash"></i>

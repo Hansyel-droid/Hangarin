@@ -9,13 +9,16 @@ admin.site.index_title = "Welcome to Hangarin Administration"
 urlpatterns = [
     path('admin/', admin.site.urls),
 
+    # PWA routes (manifest.json, serviceworker.js)
+    path('', include('pwa.urls')),
+
     # Allauth (Google / social login)
     path('accounts/', include('allauth.urls')),
 
-    # Standard Django login / logout (for the custom login.html template)
+    # Standard Django login / logout
     path('login/',  auth_views.LoginView.as_view(template_name='login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
 
-    # All app routes (tasks, notes, subtasks, categories, priorities, dashboard)
+    # All app routes
     path('', include('tasks.urls')),
 ]
