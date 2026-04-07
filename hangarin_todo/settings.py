@@ -94,9 +94,9 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 if "pythonanywhere" in socket.gethostname():
-    SITE_ID = 3  # Keep this for your live site
+    SITE_ID = 2  # Keep this for your live site
 else:
-    SITE_ID = 2  # Match this to your local Admin URL
+    SITE_ID = 1  # Match this to your local Admin URL
 
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
