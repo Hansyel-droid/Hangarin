@@ -102,16 +102,18 @@ LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/login/'
 
-ACCOUNT_LOGOUT_ON_GET = True
-ACCOUNT_LOGIN_METHODS = {"username", "email"}
-
-# 2. Tell Django to accept requests from these origins (Fixes the 403)
+# 1. Allow Django to trust your live domain for CSRF
 CSRF_TRUSTED_ORIGINS = [
-    'http://127.0.0.1:8000',
     'https://hansmaggot.pythonanywhere.com',
 ]
 
-# 3. Ensure cookies are handled correctly during redirects
+# 2. Tell Django how to handle cookies behind PythonAnywhere's proxy
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# 3. Ensure the logout doesn't require a POST form (Fixes the 403 on Redirect)
+ACCOUNT_LOGOUT_ON_GET = True
+
+# 4. Use "Lax" for cookies to allow the Google Redirect to work smoothly
 SESSION_COOKIE_SAMESITE = 'Lax'
 CSRF_COOKIE_SAMESITE = 'Lax'
 
