@@ -1,19 +1,13 @@
 from django.contrib import admin
 from .models import Task, Note, SubTask, Category, Priority
+from allauth.socialaccount.models import SocialApp, SocialAccount, SocialToken
 
-# ── Unregister broken allauth social account admin pages ──────────────────────
-# These crash on Python 3.14 due to a jazzmin incompatibility.
-# Social apps are managed via the Django shell instead.
+# This forces them to appear even if the automatic registration fails
 try:
-    from allauth.socialaccount.models import (
-        SocialAccount, SocialApp, SocialToken, EmailAddress
-    )
-    for model in [SocialAccount, SocialApp, SocialToken]:
-        try:
-            admin.site.unregister(model)
-        except admin.sites.NotRegistered:
-            pass
-except ImportError:
+    admin.site.register(SocialApp)
+    admin.site.register(SocialAccount)
+    admin.site.register(SocialToken)
+except admin.sites.AlreadyRegistered:
     pass
 
 try:

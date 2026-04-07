@@ -914,14 +914,7 @@
 
     <!-- Logout -->
     <div style="padding: 10px 14px 8px; border-top: 1px solid rgba(255,255,255,0.08);">
-        <form id="logout-form" method="post" action="{% url 'logout' %}" style="display:none;">
-            {% csrf_token %}
-        </form>
-        <a href="#" class="logout-link"
-           onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-            <i class="fa-solid fa-right-from-bracket"></i>
-            Logout
-        </a>
+        <a href="{% url 'account_logout' %}">Logout</a>
     </div>
 
     {% endif %}

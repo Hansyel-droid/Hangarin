@@ -40,6 +40,7 @@ MIDDLEWARE = [
     'allauth.account.middleware.AccountMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "allauth.account.middleware.AccountMiddleware",
 ]
 
 ROOT_URLCONF = 'hangarin_todo.urls'
@@ -93,9 +94,9 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 if "pythonanywhere" in socket.gethostname():
-    SITE_ID = 3
+    SITE_ID = 3  # Keep this for your live site
 else:
-    SITE_ID = 2
+    SITE_ID = 2  # Match this to your local Admin URL
 
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
@@ -103,6 +104,16 @@ LOGOUT_REDIRECT_URL = '/login/'
 
 ACCOUNT_LOGOUT_ON_GET = True
 ACCOUNT_LOGIN_METHODS = {"username", "email"}
+
+# 2. Tell Django to accept requests from these origins (Fixes the 403)
+CSRF_TRUSTED_ORIGINS = [
+    'http://127.0.0.1:8000',
+    'https://hansmaggot.pythonanywhere.com',
+]
+
+# 3. Ensure cookies are handled correctly during redirects
+SESSION_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SAMESITE = 'Lax'
 
 SOCIALACCOUNT_ADAPTER = 'tasks.adapter.CorporateOnlyAdapter'
 SOCIALACCOUNT_LOGIN_ON_GET = True
