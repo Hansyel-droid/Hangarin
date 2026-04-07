@@ -123,7 +123,10 @@ SOCIALACCOUNT_LOGIN_ON_GET = True
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
         'SCOPE': ['profile', 'email'],
-        'AUTH_PARAMS': {'access_type': 'online'},
+        'AUTH_PARAMS': {
+            'access_type': 'online',
+            'prompt': 'select_account', # This fixes the auto-login loop
+        },
     }
 }
 
@@ -142,12 +145,14 @@ PWA_APP_ICONS = [
     {
         'src': '/static/img/icon-192.png',
         'sizes': '192x192',
-        'type': 'image/png'
+        'type': 'image/png',
+        'purpose': 'any maskable' # This makes it look like a real app icon
     },
     {
         'src': '/static/img/icon-512.png',
         'sizes': '512x512',
-        'type': 'image/png'
+        'type': 'image/png',
+        'purpose': 'any maskable'
     }
 ]
 PWA_APP_ICONS_APPLE = [
@@ -160,6 +165,20 @@ PWA_APP_ICONS_APPLE = [
         'src': '/static/img/icon-512.png',
         'sizes': '512x512',
         'type': 'image/png'
+    }
+]
+PWA_APP_SCREENSHOTS = [
+    {
+        'src': '/static/img/screenshot-mobile.png', # Ensure this file exists in static/img/
+        'sizes': '750x1334',
+        'type': 'image/png',
+        'form_factor': 'narrow',
+    },
+    {
+        'src': '/static/img/screenshot-desktop.png', # Ensure this file exists in static/img/
+        'sizes': '1280x720',
+        'type': 'image/png',
+        'form_factor': 'wide',
     }
 ]
 PWA_APP_DIR = 'ltr'
