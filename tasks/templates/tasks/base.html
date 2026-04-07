@@ -1,956 +1,294 @@
-{%load static%}
-{% load pwa %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    {% progressive_web_app_meta %}
-    <link rel="manifest" href="/manifest.json">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}{{ page_title }} — Hangarin{% endblock %}</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <style>
-        :root {
-            /* ── Main palette ── */
-            --bg:           #f0f0ec;
-            --bg-card:      #ffffff;
-            --bg-elevated:  #f7f7f4;
-            --bg-hover:     #eeede9;
-            --border:       #e2e0db;
-            --border-light: #d0cdc7;
+<!-- ============================================================
+     RESPONSIVE PATCH FOR base.html
+     
+     INSTRUCTIONS: Make these 3 changes to your base.html:
+     
+     1. Add the CSS block below inside your <style> tag (before the closing </style>)
+     2. Replace your <aside class="sidebar"> opening tag area with the new version
+     3. Add the <script> block before </body>
+     ============================================================ -->
 
-            /* ── Text ── */
-            --text-primary:   #111210;
-            --text-secondary: #4a4840;
-            --text-muted:     #8a8880;
 
-            /* ── Sidebar — black ── */
-            --sb-bg:          #0f0f0f;   /* near black */
-            --sb-bg-hover:    #1e1e1e;   /* slightly lighter on hover */
-            --sb-active:      #2a2a2a;   /* active item background */
-            --sb-border:      rgba(255,255,255,0.08);
-            --sb-text:        rgba(255,255,255,0.55);
-            --sb-text-active: #ffffff;
-            --sb-text-muted:  rgba(255,255,255,0.28);
-            --sb-label:       rgba(255,255,255,0.25);
-
-            /* ── Accent (green) ── */
-            --accent:         #4a7c59;
-            --accent-light:   #5e9970;
-            --accent-glow:    rgba(74, 124, 89, 0.10);
-            --accent-border:  rgba(74, 124, 89, 0.22);
-
-            /* ── Semantic ── */
-            --green:          #3d8b6a;
-            --green-bg:       rgba(61, 139, 106, 0.08);
-            --yellow:         #b07d2e;
-            --yellow-bg:      rgba(176, 125, 46, 0.09);
-            --red:            #b84040;
-            --red-bg:         rgba(184, 64, 64, 0.08);
-            --blue:           #3b6ea5;
-            --blue-bg:        rgba(59, 110, 165, 0.09);
-            --orange:         #b8622a;
-            --orange-bg:      rgba(184, 98, 42, 0.09);
-
-            /* ── Layout ── */
-            --sidebar-w:    256px;
-            --radius:       12px;
-            --radius-sm:    8px;
-            --shadow:       0 2px 12px rgba(17, 18, 16, 0.07);
-            --shadow-md:    0 4px 28px rgba(17, 18, 16, 0.10);
-            --transition:   0.15s ease;
-        }
-
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        html { height: 100%; }
-
-        body {
-            font-family: 'Outfit', sans-serif;
-            background: var(--bg);
-            color: var(--text-primary);
-            display: flex;
-            min-height: 100vh;
-            font-size: 15px;
-            line-height: 1.6;
-            -webkit-font-smoothing: antialiased;
-        }
-
+<!-- ════════════════════════════════════════════════════════════
+     CHANGE 1: Add this entire block inside your <style> tag,
+     just before the closing </style> tag
+════════════════════════════════════════════════════════════ -->
+<style>
         /* ═══════════════════════════════════════
-           SIDEBAR
+           MOBILE HAMBURGER BUTTON
         ═══════════════════════════════════════ */
-        .sidebar {
-            width: var(--sidebar-w);
-            background: var(--sb-bg);
-            display: flex;
-            flex-direction: column;
+        .hamburger {
+            display: none;
             position: fixed;
-            top: 0; left: 0; bottom: 0;
-            z-index: 100;
-            overflow-y: auto;
-        }
-
-        /* Brand / Title */
-        .sidebar-brand {
-            padding: 24px 22px 20px;
-            border-bottom: 1px solid var(--sb-border);
-        }
-
-        .sidebar-brand a {
-            text-decoration: none;
-        }
-
-        .brand-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 22px;
-            font-weight: 700;
-            color: #ffffff;
-            letter-spacing: -0.3px;
-            line-height: 1;
-        }
-
-        /* User block (just below brand) */
-        .sidebar-user-block {
-            padding: 14px 22px 12px;
-            border-bottom: 1px solid var(--sb-border);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 8px;
-        }
-
-        .user-left {
-            display: flex;
-            flex-direction: column;
-            min-width: 0;
-        }
-
-        .user-name {
-            font-size: 15px;
-            font-weight: 600;
-            color: #ffffff;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            line-height: 1.2;
-        }
-
-        .user-role {
-            font-size: 11.5px;
-            color: var(--sb-text);
-            font-weight: 400;
-            margin-top: 2px;
-        }
-
-        .user-caret {
-            color: var(--sb-text);
-            font-size: 11px;
-            flex-shrink: 0;
-        }
-
-        /* Nav */
-        .sidebar-nav {
-            padding: 16px 12px;
-            flex: 1;
-        }
-
-        .nav-section-label {
-            font-size: 10px;
-            font-weight: 600;
-            letter-spacing: 1.6px;
-            text-transform: uppercase;
-            color: var(--sb-label);
-            padding: 10px 10px 6px;
-            margin-top: 4px;
-        }
-
-        .nav-link {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 9px 10px;
-            border-radius: 6px;
-            color: var(--sb-text);
-            text-decoration: none;
-            font-size: 14.5px;
-            font-weight: 500;
-            transition: background var(--transition), color var(--transition);
-            margin-bottom: 1px;
-            position: relative;
-        }
-
-        .nav-link:hover {
-            background: var(--sb-bg-hover);
-            color: var(--sb-text-active);
-        }
-
-        /* Active: left blue bar + slightly lighter bg, matching the image */
-        .nav-link.active {
-            background: var(--sb-active);
-            color: #ffffff;
-            font-weight: 600;
-        }
-
-        .nav-link.active::before {
-            content: '';
-            position: absolute;
-            left: 0; top: 6px; bottom: 6px;
-            width: 3px;
-            background: #4a7c59;
-            border-radius: 0 3px 3px 0;
-        }
-
-        /* Square checkbox-style icon — matches the image exactly */
-        .nav-icon {
-            width: 20px; height: 20px;
-            border: 1.5px solid rgba(255,255,255,0.35);
-            border-radius: 4px;
-            display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0;
-            font-size: 10px;
-            color: rgba(255,255,255,0.40);
-            transition: var(--transition);
-        }
-
-        .nav-link:hover .nav-icon {
-            border-color: rgba(255,255,255,0.60);
-            color: rgba(255,255,255,0.70);
-        }
-
-        .nav-link.active .nav-icon {
-            border-color: #4a7c59;
-            color: #4a7c59;
-            background: rgba(74,124,89,0.15);
-        }
-
-        /* Sidebar footer (admin link) */
-        .sidebar-footer {
-            padding: 14px 22px;
-            border-top: 1px solid var(--sb-border);
-        }
-
-        .admin-link {
-            display: flex;
-            align-items: center;
-            gap: 9px;
-            color: var(--sb-text-muted);
-            text-decoration: none;
-            font-size: 12.5px;
-            transition: color var(--transition);
-        }
-
-        .admin-link:hover { color: rgba(255,255,255,0.65); }
-
-        /* Logout button */
-        .logout-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            padding: 4px 9px;
-            border-radius: 6px;
-            background: rgba(255,255,255,0.06);
-            border: 1px solid rgba(255,255,255,0.10);
-            color: rgba(255,255,255,0.38);
-            font-size: 12px;
-            font-weight: 500;
-            text-decoration: none;
-            transition: var(--transition);
-            flex-shrink: 0;
-        }
-
-        .logout-link:hover {
-            background: rgba(184,64,64,0.18);
-            border-color: rgba(184,64,64,0.35);
-            color: #e87878;
-        }
-
-        /* ═══════════════════════════════════════
-           MAIN CONTENT AREA
-        ═══════════════════════════════════════ */
-        .main {
-            margin-left: var(--sidebar-w);
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-            min-width: 0;
-            width: calc(100% - var(--sidebar-w));
-        }
-
-        .topbar {
-            background: var(--bg-card);
-            border-bottom: 1px solid var(--border);
-            padding: 0 32px;
-            height: 62px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: sticky;
-            top: 0;
-            z-index: 50;
-            box-shadow: 0 1px 0 var(--border);
-        }
-
-        .topbar-left h1 {
-            font-family: 'Playfair Display', serif;
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--text-primary);
-            letter-spacing: -0.2px;
-        }
-
-        .topbar-right {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .content {
-            padding: 32px;
-            flex: 1;
-        }
-
-        /* ═══════════════════════════════════════
-           CARDS
-        ═══════════════════════════════════════ */
-        .card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 24px;
-            box-shadow: var(--shadow);
-        }
-
-        .card-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 15px;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 18px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        /* ═══════════════════════════════════════
-           STAT CARDS
-        ═══════════════════════════════════════ */
-        .stats-grid,
-        .stats-row {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 14px;
-            margin-bottom: 26px;
-        }
-
-        @media (max-width: 1100px) {
-            .stats-grid, .stats-row { grid-template-columns: repeat(3, 1fr); }
-        }
-
-        @media (max-width: 700px) {
-            .stats-grid, .stats-row { grid-template-columns: repeat(2, 1fr); }
-        }
-
-        /* dashboard.html uses .stat, base uses .stat-card — support both */
-        .stat-card,
-        .stat {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 20px 22px;
-            position: relative;
-            overflow: hidden;
-            transition: transform var(--transition), box-shadow var(--transition);
-            box-shadow: var(--shadow);
-        }
-
-        .stat-card:hover,
-        .stat:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
-
-        .stat-card::after,
-        .stat::after {
-            content: '';
-            position: absolute;
-            bottom: 0; left: 0; right: 0;
-            height: 3px;
-            border-radius: 0 0 var(--radius) var(--radius);
-        }
-
-        .stat-card.green::after,
-        .stat.green::after  { background: var(--green); }
-        .stat-card.yellow::after,
-        .stat.yellow::after { background: var(--yellow); }
-        .stat-card.blue::after,
-        .stat.blue::after   { background: var(--blue); }
-        .stat-card.orange::after,
-        .stat.orange::after { background: var(--orange); }
-        .stat-card.purple::after,
-        .stat.purple::after { background: #7c6af5; }
-
-        /* stat-top: row layout for number + icon side by side */
-        .stat-top {
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            gap: 8px;
-        }
-
-        /* Numbers */
-        .stat-num,
-        .stat-value {
-            font-family: 'Playfair Display', serif;
-            font-size: 30px;
-            font-weight: 700;
-            color: var(--text-primary);
-            line-height: 1.1;
-            margin-bottom: 4px;
-        }
-
-        /* Labels */
-        .stat-lbl,
-        .stat-label {
-            font-size: 11.5px;
-            font-weight: 500;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.7px;
-        }
-
-        /* Icons */
-        .stat-icon {
-            width: 38px; height: 38px;
-            border-radius: 9px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 15px;
-            flex-shrink: 0;
-        }
-
-        /* si-* color variants used in dashboard.html */
-        .si-green  { background: var(--green-bg);  color: var(--green); }
-        .si-yellow { background: var(--yellow-bg); color: var(--yellow); }
-        .si-blue   { background: var(--blue-bg);   color: var(--blue); }
-        .si-orange { background: var(--orange-bg); color: var(--orange); }
-        .si-purple { background: rgba(124,106,245,0.09); color: #7c6af5; }
-
-        /* stat-card color variants */
-        .stat-card.green  .stat-icon { background: var(--green-bg);  color: var(--green); }
-        .stat-card.yellow .stat-icon { background: var(--yellow-bg); color: var(--yellow); }
-        .stat-card.blue   .stat-icon { background: var(--blue-bg);   color: var(--blue); }
-        .stat-card.orange .stat-icon { background: var(--orange-bg); color: var(--orange); }
-        .stat-card.purple .stat-icon { background: rgba(124,106,245,0.09); color: #7c6af5; }
-
-        /* ═══════════════════════════════════════
-           BUTTONS
-        ═══════════════════════════════════════ */
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 7px;
-            padding: 8px 16px;
-            border-radius: var(--radius-sm);
-            font-size: 13.5px;
-            font-weight: 500;
-            font-family: 'Outfit', sans-serif;
-            cursor: pointer;
-            text-decoration: none;
-            border: 1px solid transparent;
-            transition: all var(--transition);
-            white-space: nowrap;
-            line-height: 1;
-        }
-
-        .btn-primary {
+            top: 14px;
+            left: 14px;
+            z-index: 200;
+            width: 40px;
+            height: 40px;
             background: var(--sb-bg);
-            color: #ffffff;
-            border-color: var(--sb-bg);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 8px;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            flex-direction: column;
+            gap: 5px;
+            padding: 10px;
         }
-        .btn-primary:hover { background: var(--sb-active); border-color: var(--sb-active); }
 
-        .btn-secondary {
-            background: transparent;
-            color: var(--text-secondary);
-            border-color: var(--border);
-        }
-        .btn-secondary:hover { background: var(--bg-hover); color: var(--text-primary); border-color: var(--border-light); }
-
-        .btn-danger {
-            background: var(--red-bg);
-            color: var(--red);
-            border-color: rgba(184,64,64,0.22);
-        }
-        .btn-danger:hover { background: var(--red); color: white; }
-
-        .btn-sm  { padding: 6px 12px; font-size: 12.5px; }
-        .btn-icon { padding: 6px; width: 32px; height: 32px; justify-content: center; }
-
-        /* ═══════════════════════════════════════
-           FORMS
-        ═══════════════════════════════════════ */
-        .form-group { margin-bottom: 18px; }
-
-        .form-label {
+        .hamburger span {
             display: block;
-            font-size: 11.5px;
-            font-weight: 600;
-            letter-spacing: 0.7px;
-            text-transform: uppercase;
-            color: var(--text-muted);
-            margin-bottom: 7px;
+            width: 18px;
+            height: 2px;
+            background: rgba(255,255,255,0.8);
+            border-radius: 2px;
+            transition: all 0.25s ease;
+            transform-origin: center;
         }
 
-        .form-control,
-        input[type="text"], input[type="email"], input[type="password"],
-        input[type="datetime-local"], textarea, select {
-            width: 100%;
-            background: var(--bg-elevated);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            padding: 9px 13px;
-            color: var(--text-primary);
-            font-size: 14px;
-            font-family: 'Outfit', sans-serif;
-            transition: border-color var(--transition), box-shadow var(--transition);
-            outline: none;
-            appearance: none;
-        }
-
-        .form-control:focus,
-        input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus,
-        input[type="datetime-local"]:focus, textarea:focus, select:focus {
-            border-color: var(--accent);
-            background: var(--bg-card);
-            box-shadow: 0 0 0 3px var(--accent-glow);
-        }
-
-        .form-control::placeholder { color: var(--text-muted); }
-        textarea.form-control { resize: vertical; min-height: 96px; }
+        .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+        .hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+        .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
         /* ═══════════════════════════════════════
-           FILTER BAR
+           SIDEBAR OVERLAY (mobile backdrop)
         ═══════════════════════════════════════ */
-        .filter-bar {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-bottom: 20px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid var(--border);
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.55);
+            z-index: 99;
+            backdrop-filter: blur(2px);
+            opacity: 0;
+            transition: opacity 0.25s ease;
         }
 
-        .search-box {
-            position: relative;
-            flex: 1;
-            min-width: 200px;
-        }
-
-        .search-box i {
-            position: absolute;
-            left: 12px; top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-muted);
-            font-size: 12px;
-        }
-
-        .search-box .form-control { padding-left: 36px; }
-
-        .filter-group { display: flex; align-items: center; gap: 6px; }
-
-        .filter-group label {
-            font-size: 12px;
-            color: var(--text-muted);
-            font-weight: 500;
-            white-space: nowrap;
-        }
-
-        .filter-select {
-            background: var(--bg-elevated);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            padding: 7px 10px;
-            color: var(--text-primary);
-            font-size: 13px;
-            font-family: 'Outfit', sans-serif;
-            cursor: pointer;
-            outline: none;
-        }
-
-        .filter-select:focus { border-color: var(--accent); }
-
-        /* ═══════════════════════════════════════
-           TABLE
-        ═══════════════════════════════════════ */
-        .table-wrap {
-            overflow-x: auto;
-            border-radius: var(--radius-sm);
-            border: 1px solid var(--border);
-        }
-
-        table { width: 100%; border-collapse: collapse; }
-        thead { background: var(--bg-elevated); }
-
-        th {
-            padding: 10px 15px;
-            text-align: left;
-            font-size: 10.5px;
-            font-weight: 600;
-            letter-spacing: 0.9px;
-            text-transform: uppercase;
-            color: var(--text-muted);
-            border-bottom: 1px solid var(--border);
-            white-space: nowrap;
-        }
-
-        td {
-            padding: 12px 15px;
-            font-size: 14px;
-            color: var(--text-secondary);
-            border-bottom: 1px solid var(--border);
-        }
-
-        tbody tr:last-child td { border-bottom: none; }
-        tbody tr { transition: background var(--transition); }
-        tbody tr:hover { background: var(--bg-elevated); }
-        .task-title-cell { font-weight: 500; color: var(--text-primary); }
-
-        /* ═══════════════════════════════════════
-           BADGES
-        ═══════════════════════════════════════ */
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            padding: 3px 9px;
-            border-radius: 99px;
-            font-size: 12px;
-            font-weight: 500;
-            letter-spacing: 0.2px;
-            white-space: nowrap;
-        }
-
-        .badge-completed { background: var(--green-bg);  color: var(--green);  border: 1px solid rgba(61,139,106,0.18); }
-        .badge-progress  { background: var(--blue-bg);   color: var(--blue);   border: 1px solid rgba(59,110,165,0.18); }
-        .badge-pending   { background: var(--yellow-bg); color: var(--yellow); border: 1px solid rgba(176,125,46,0.18); }
-        .badge-high      { background: var(--red-bg);    color: var(--red);    border: 1px solid rgba(184,64,64,0.18); }
-        .badge-medium    { background: var(--yellow-bg); color: var(--yellow); border: 1px solid rgba(176,125,46,0.18); }
-        .badge-low       { background: var(--green-bg);  color: var(--green);  border: 1px solid rgba(61,139,106,0.18); }
-        .badge-critical  { background: rgba(184,64,64,0.14); color: var(--red); border: 1px solid rgba(184,64,64,0.25); font-weight:600; }
-        .badge-optional  { background: var(--blue-bg);   color: var(--blue);   border: 1px solid rgba(59,110,165,0.18); }
-
-        /* b-* shorthand variants used in dashboard/task templates */
-        .b-completed { background: var(--green-bg);  color: var(--green);  border: 1px solid rgba(61,139,106,0.18); }
-        .b-progress  { background: var(--blue-bg);   color: var(--blue);   border: 1px solid rgba(59,110,165,0.18); }
-        .b-pending   { background: var(--yellow-bg); color: var(--yellow); border: 1px solid rgba(176,125,46,0.18); }
-        .b-high      { background: var(--red-bg);    color: var(--red);    border: 1px solid rgba(184,64,64,0.18); }
-        .b-critical  { background: rgba(184,64,64,0.14); color: var(--red); border: 1px solid rgba(184,64,64,0.25); font-weight:600; }
-        .b-medium    { background: var(--yellow-bg); color: var(--yellow); border: 1px solid rgba(176,125,46,0.18); }
-        .b-low       { background: var(--green-bg);  color: var(--green);  border: 1px solid rgba(61,139,106,0.18); }
-        .b-optional  { background: var(--blue-bg);   color: var(--blue);   border: 1px solid rgba(59,110,165,0.18); }
-        .b-cat       { background: var(--bg-elevated); color: var(--text-secondary); border: 1px solid var(--border); }
-
-        /* Table cell helpers */
-        .td-strong { font-weight: 600; color: var(--text-primary); }
-        .td-muted  { color: var(--text-muted); font-size: 13px; }
-        .td-link   { color: var(--text-primary); font-weight: 600; text-decoration: none; }
-        .td-link:hover { color: var(--accent); }
-
-        /* Card header (used in dashboard recent tasks card) */
-        .card-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 0 18px 0;
-            margin-bottom: 0;
-            border-bottom: 1px solid var(--border);
-        }
-
-        /* btn-ghost used in dashboard */
-        .btn-ghost {
-            background: transparent;
-            color: var(--text-secondary);
-            border-color: var(--border);
-        }
-        .btn-ghost:hover { background: var(--bg-hover); color: var(--text-primary); border-color: var(--border-light); }
-
-        /* ═══════════════════════════════════════
-           PAGINATION
-        ═══════════════════════════════════════ */
-        .pagination {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            margin-top: 20px;
-            justify-content: center;
-        }
-
-        .page-btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 34px; height: 34px;
-            border-radius: var(--radius-sm);
-            border: 1px solid var(--border);
-            background: var(--bg-card);
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-size: 13px;
-            font-weight: 500;
-            transition: var(--transition);
-        }
-
-        .page-btn:hover { border-color: var(--accent); color: var(--accent); }
-        .page-btn.active { background: var(--sb-bg); border-color: var(--sb-bg); color: white; }
-        .page-btn.disabled { opacity: 0.35; pointer-events: none; }
-
-        /* ═══════════════════════════════════════
-           ALERTS
-        ═══════════════════════════════════════ */
-        .alert {
-            padding: 11px 15px;
-            border-radius: var(--radius-sm);
-            margin-bottom: 18px;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .alert-success { background: var(--green-bg); color: var(--green); border: 1px solid rgba(61,139,106,0.2); }
-        .alert-error   { background: var(--red-bg);   color: var(--red);   border: 1px solid rgba(184,64,64,0.2); }
-
-        /* ═══════════════════════════════════════
-           DETAIL PAGE
-        ═══════════════════════════════════════ */
-        .detail-header {
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            gap: 16px;
-            margin-bottom: 22px;
-        }
-
-        .detail-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
-
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
-        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; }
-
-        @media (max-width: 900px) { .grid-3 { grid-template-columns: 1fr 1fr; } }
-        @media (max-width: 640px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
-
-        /* ═══════════════════════════════════════
-           SUBTASK ROWS
-        ═══════════════════════════════════════ */
-        .subtask-item {
-            display: flex;
-            align-items: center;
-            gap: 11px;
-            padding: 10px 0;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .subtask-item:last-child { border-bottom: none; }
-
-        .subtask-check {
-            width: 18px; height: 18px;
-            border-radius: 4px;
-            border: 1.5px solid var(--border-light);
-            display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0;
-            cursor: pointer;
-            transition: var(--transition);
-            text-decoration: none;
-            color: transparent;
-            background: var(--bg-elevated);
-        }
-
-        .subtask-check.done { background: var(--green); border-color: var(--green); color: white; }
-        .subtask-check:hover { border-color: var(--green); }
-        .subtask-title { flex: 1; font-size: 14px; color: var(--text-secondary); }
-        .subtask-title.done { text-decoration: line-through; color: var(--text-muted); }
-
-        /* ═══════════════════════════════════════
-           NOTE CARD
-        ═══════════════════════════════════════ */
-        .note-card {
-            background: var(--bg-elevated);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            padding: 13px 15px;
-            margin-bottom: 10px;
-        }
-
-        .note-card p { font-size: 14px; color: var(--text-secondary); line-height: 1.65; }
-        .note-meta { font-size: 11px; color: var(--text-muted); }
-
-        /* ═══════════════════════════════════════
-           EMPTY STATE
-        ═══════════════════════════════════════ */
-        .empty-state {
-            text-align: center;
-            padding: 50px 24px;
-            color: var(--text-muted);
-        }
-
-        .empty-state i { font-size: 34px; margin-bottom: 12px; opacity: 0.25; display: block; }
-        .empty-state p { font-size: 14px; color: var(--text-muted); }
-
-        /* ═══════════════════════════════════════
-           CONFIRM / DANGER
-        ═══════════════════════════════════════ */
-        .confirm-box { max-width: 480px; margin: 0 auto; }
-
-        .danger-zone {
-            background: var(--red-bg);
-            border: 1px solid rgba(184,64,64,0.18);
-            border-radius: var(--radius);
-            padding: 28px 26px;
-            text-align: center;
-        }
-
-        .danger-zone i { font-size: 28px; color: var(--red); margin-bottom: 12px; display: block; }
-        .danger-zone h3 { color: var(--red); font-family: 'Playfair Display', serif; font-size: 18px; margin-bottom: 10px; }
-        .danger-zone p  { color: var(--text-secondary); font-size: 14px; line-height: 1.7; margin-bottom: 22px; }
-
-        /* ═══════════════════════════════════════
-           INFO ROW
-        ═══════════════════════════════════════ */
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px solid var(--border);
-            font-size: 14px;
-        }
-
-        .info-row:last-child { border-bottom: none; }
-        .info-row .label { color: var(--text-muted); }
-        .info-row .value { color: var(--text-primary); font-weight: 500; }
-
-        /* ═══════════════════════════════════════
-           SECTION HEADER
-        ═══════════════════════════════════════ */
-        .section-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 18px;
-        }
-
-        .section-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 17px;
-            font-weight: 700;
-            color: var(--text-primary);
+        .sidebar-overlay.visible {
+            opacity: 1;
         }
 
         /* ═══════════════════════════════════════
-           SCROLLBAR
+           RESPONSIVE BREAKPOINTS
         ═══════════════════════════════════════ */
-        ::-webkit-scrollbar { width: 5px; height: 5px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 99px; }
-        ::-webkit-scrollbar-thumb:hover { background: #b8b4ae; }
-    </style>
-</head>
-<body>
+        @media (max-width: 768px) {
 
-<!-- ═══════════ SIDEBAR ═══════════ -->
-<aside class="sidebar">
+            /* Show hamburger */
+            .hamburger { display: flex; }
 
-    <!-- Brand -->
-    <div class="sidebar-brand">
-        <a href="{% url 'dashboard' %}">
-            <div class="brand-title">Hangarin</div>
-        </a>
-    </div>
+            /* Show overlay element */
+            .sidebar-overlay { display: block; }
 
-    {% if user.is_authenticated %}
+            /* Sidebar slides off-screen by default */
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+                z-index: 150;
+                width: 260px;
+            }
 
-    <!-- User block -->
-    <div class="sidebar-user-block">
-        <div class="user-left">
-            <div class="user-name">{{ user.username }}</div>
-            <div class="user-role">Task Manager</div>
-        </div>
-        <i class="fa-solid fa-caret-down user-caret"></i>
-    </div>
+            /* Sidebar slides in when open */
+            .sidebar.open {
+                transform: translateX(0);
+            }
 
-    <!-- Navigation -->
-    <nav class="sidebar-nav">
+            /* Main content takes full width */
+            .main {
+                margin-left: 0;
+                width: 100%;
+            }
 
-        <div class="nav-section-label">Main</div>
-        <a href="{% url 'dashboard' %}" class="nav-link {% block nav_dashboard %}{% endblock %}">
-            <span class="nav-icon"><i class="fa-regular fa-square"></i></span>
-            Dashboard
-        </a>
+            /* Topbar adjustments */
+            .topbar {
+                padding: 0 16px 0 64px; /* left padding makes room for hamburger */
+                height: 56px;
+            }
 
-        <div class="nav-section-label">Tasks</div>
-        <a href="{% url 'task_list' %}" class="nav-link {% block nav_tasks %}{% endblock %}">
-            <span class="nav-icon"><i class="fa-regular fa-square"></i></span>
-            Tasks
-        </a>
-        <a href="{% url 'subtask_list' %}" class="nav-link {% block nav_subtasks %}{% endblock %}">
-            <span class="nav-icon"><i class="fa-regular fa-square"></i></span>
-            Sub Tasks
-        </a>
-        <a href="{% url 'note_list' %}" class="nav-link {% block nav_notes %}{% endblock %}">
-            <span class="nav-icon"><i class="fa-regular fa-square"></i></span>
-            Notes
-        </a>
+            .topbar-left h1 {
+                font-size: 15px;
+            }
 
-        <div class="nav-section-label">Config</div>
-        <a href="{% url 'category_list' %}" class="nav-link {% block nav_categories %}{% endblock %}">
-            <span class="nav-icon"><i class="fa-regular fa-square"></i></span>
-            Categories
-        </a>
-        <a href="{% url 'priority_list' %}" class="nav-link {% block nav_priorities %}{% endblock %}">
-            <span class="nav-icon"><i class="fa-regular fa-square"></i></span>
-            Priorities
-        </a>
+            /* Content padding tighter on mobile */
+            .content {
+                padding: 18px 16px 90px; /* bottom padding for bottom nav */
+            }
 
-    </nav>
+            /* Stats grid 2 cols on mobile */
+            .stats-grid,
+            .stats-row {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+                margin-bottom: 18px;
+            }
 
-    <!-- Logout -->
-    <div style="padding: 10px 14px 8px; border-top: 1px solid rgba(255,255,255,0.08);">
-        <a href="{% url 'account_logout' %}">Logout</a>
-    </div>
+            .stat-num, .stat-value { font-size: 24px; }
 
-    {% endif %}
+            /* Cards */
+            .card { padding: 16px; }
 
-    <!-- Admin link -->
-    <div class="sidebar-footer">
-        <a href="/admin/" class="admin-link">
-            <i class="fa-solid fa-shield-halved"></i>
-            Admin Panel
-        </a>
-    </div>
+            /* Tables scroll horizontally */
+            .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
-</aside>
+            /* Grid layouts stack */
+            .grid-2, .grid-3 { grid-template-columns: 1fr; }
 
-<!-- ═══════════ MAIN ═══════════ -->
-<main class="main">
-    <header class="topbar">
-        <div class="topbar-left">
-            <h1>{% block page_heading %}{{ page_title }}{% endblock %}</h1>
-        </div>
-        <div class="topbar-right">
-            {% block topbar_actions %}{% endblock %}
-        </div>
-    </header>
+            /* Filter bar stacks */
+            .filter-bar { flex-direction: column; align-items: stretch; }
+            .search-box { min-width: unset; }
+            .filter-group { flex-wrap: wrap; }
 
-    <div class="content">
-        {% for message in messages %}
-        <div class="alert alert-{{ message.tags }}">
-            <i class="fa-solid {% if message.tags == 'success' %}fa-circle-check{% else %}fa-circle-exclamation{% endif %}"></i>
-            {{ message }}
-        </div>
-        {% endfor %}
+            /* Topbar actions wrap */
+            .topbar-right { gap: 6px; }
+            .topbar-right .btn span { display: none; } /* hide button text on mobile, keep icon */
 
-        {% block content %}{% endblock %}
-    </div>
-</main>
+            /* Detail header stacks */
+            .detail-header { flex-direction: column; gap: 12px; }
+        }
 
-</body>
-</html>
+        @media (max-width: 480px) {
+            /* Single column stats on very small phones */
+            .stats-grid,
+            .stats-row {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+
+            .topbar-left h1 { font-size: 14px; }
+            .content { padding: 14px 12px 90px; }
+            .card { padding: 14px; }
+        }
+
+        /* ═══════════════════════════════════════
+           BOTTOM NAV BAR (mobile only)
+        ═══════════════════════════════════════ */
+        .bottom-nav {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .bottom-nav {
+                display: flex;
+                position: fixed;
+                bottom: 0; left: 0; right: 0;
+                height: 62px;
+                background: var(--sb-bg);
+                border-top: 1px solid rgba(255,255,255,0.08);
+                z-index: 90;
+                align-items: stretch;
+                padding-bottom: env(safe-area-inset-bottom); /* iPhone notch support */
+            }
+
+            .bottom-nav a {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 4px;
+                color: rgba(255,255,255,0.40);
+                text-decoration: none;
+                font-size: 10px;
+                font-weight: 500;
+                letter-spacing: 0.3px;
+                transition: color 0.15s;
+                padding: 6px 4px;
+            }
+
+            .bottom-nav a i {
+                font-size: 18px;
+                line-height: 1;
+            }
+
+            .bottom-nav a.active {
+                color: #4a7c59;
+            }
+
+            .bottom-nav a:hover {
+                color: rgba(255,255,255,0.75);
+            }
+        }
+</style>
+
+
+<!-- ════════════════════════════════════════════════════════════
+     CHANGE 2: Replace the opening of your <body> section.
+     Add the hamburger button and overlay BEFORE your <aside class="sidebar">
+════════════════════════════════════════════════════════════ -->
+
+<!-- Paste this RIGHT AFTER <body> and BEFORE <aside class="sidebar"> -->
+
+<!-- Hamburger button -->
+<button class="hamburger" id="hamburgerBtn" aria-label="Toggle menu">
+    <span></span>
+    <span></span>
+    <span></span>
+</button>
+
+<!-- Sidebar overlay (backdrop) -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+
+<!-- ════════════════════════════════════════════════════════════
+     CHANGE 3: Add the bottom nav bar BEFORE </main> closing tag
+     (adjust the active class to match the current page using
+      Django template blocks just like your sidebar nav links)
+════════════════════════════════════════════════════════════ -->
+
+<!-- Bottom Nav — paste just before </main> -->
+<nav class="bottom-nav">
+    <a href="{% url 'dashboard' %}" class="{% block bnav_dashboard %}{% endblock %}">
+        <i class="fa-solid fa-house"></i>
+        Home
+    </a>
+    <a href="{% url 'task_list' %}" class="{% block bnav_tasks %}{% endblock %}">
+        <i class="fa-solid fa-list-check"></i>
+        Tasks
+    </a>
+    <a href="{% url 'subtask_list' %}" class="{% block bnav_subtasks %}{% endblock %}">
+        <i class="fa-solid fa-diagram-subtask"></i>
+        Subtasks
+    </a>
+    <a href="{% url 'note_list' %}" class="{% block bnav_notes %}{% endblock %}">
+        <i class="fa-solid fa-note-sticky"></i>
+        Notes
+    </a>
+    <a href="{% url 'category_list' %}" class="{% block bnav_categories %}{% endblock %}">
+        <i class="fa-solid fa-tags"></i>
+        More
+    </a>
+</nav>
+
+
+<!-- ════════════════════════════════════════════════════════════
+     CHANGE 4: Add this <script> block just before </body>
+════════════════════════════════════════════════════════════ -->
+<script>
+    const hamburger = document.getElementById('hamburgerBtn');
+    const sidebar   = document.querySelector('.sidebar');
+    const overlay   = document.getElementById('sidebarOverlay');
+
+    function openSidebar() {
+        sidebar.classList.add('open');
+        overlay.classList.add('visible');
+        hamburger.classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeSidebar() {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('visible');
+        hamburger.classList.remove('open');
+        document.body.style.overflow = '';
+    }
+
+    hamburger.addEventListener('click', () => {
+        sidebar.classList.contains('open') ? closeSidebar() : openSidebar();
+    });
+
+    overlay.addEventListener('click', closeSidebar);
+
+    // Close sidebar when a nav link is clicked (navigate away)
+    sidebar.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', closeSidebar);
+    });
+</script>
