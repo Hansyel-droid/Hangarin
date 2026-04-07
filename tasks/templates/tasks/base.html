@@ -710,33 +710,7 @@
 
         {% block content %}{% endblock %}
     </div>
-
-    <!-- Bottom Nav (mobile only) -->
-    {% if user.is_authenticated %}
-    <nav class="bottom-nav">
-        <a href="{% url 'dashboard' %}" class="{% block bnav_dashboard %}{% endblock %}">
-            <i class="fa-solid fa-house"></i>
-            Home
-        </a>
-        <a href="{% url 'task_list' %}" class="{% block bnav_tasks %}{% endblock %}">
-            <i class="fa-solid fa-list-check"></i>
-            Tasks
-        </a>
-        <a href="{% url 'subtask_list' %}" class="{% block bnav_subtasks %}{% endblock %}">
-            <i class="fa-solid fa-layer-group"></i>
-            Subtasks
-        </a>
-        <a href="{% url 'note_list' %}" class="{% block bnav_notes %}{% endblock %}">
-            <i class="fa-solid fa-note-sticky"></i>
-            Notes
-        </a>
-        <a href="{% url 'category_list' %}" class="{% block bnav_more %}{% endblock %}">
-            <i class="fa-solid fa-ellipsis"></i>
-            More
-        </a>
-    </nav>
-    {% endif %}
-
+   
 </main>
 
 <script>
